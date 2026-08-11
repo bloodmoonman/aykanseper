@@ -441,13 +441,13 @@ footer span{color:var(--clay)}
     </div>
     <div class="contact-right">
       <span class="slabel">Form</span>
-      <form class="cform" action="https://formspree.io/f/xaqgqvqz" method="POST" onsubmit="submitForm(event)">
+      <form class="cform" action="https://formspree.io/f/xaqgqvqz" method="POST" id="contact-form">
         <div class="crow">
           <div class="cg"><label>Ad Soyad</label><input type="text" name="isim" placeholder="Adınız"/></div>
           <div class="cg"><label>E-posta</label><input type="email" name="email" placeholder="mail@ornek.com"/></div>
         </div>
         <div class="cg"><label>Konu</label>
-          <select><option value="">Seçiniz...</option><option>Eser hakkında bilgi</option><option>Satın alma</option><option>Sergi daveti</option><option>Diğer</option></select>
+          <select name="konu"><option value="">Seçiniz...</option><option value="Eser hakkında bilgi">Eser hakkında bilgi</option><option value="Satın alma">Satın alma</option><option value="Sergi daveti">Sergi daveti</option><option value="Diğer">Diğer</option></select>
         </div>
         <div class="cg"><label>Mesaj</label><textarea name="mesaj" placeholder="Mesajınız..."></textarea></div>
         <button type="submit" class="csub">Gönder</button>
@@ -545,12 +545,44 @@ document.querySelectorAll('.gcard').forEach((card, i) => {
   }
 });
 
-function submitForm(e){
+const contactForm = document.getElementById('contact-form');
+const successMessage = document.getElementById('csuccess');
+
+contactForm.addEventListener('submit', async function(e) {
   e.preventDefault();
-  document.getElementById('csuccess').style.display='block';
-  e.target.reset();
-  setTimeout(()=>document.getElementById('csuccess').style.display='none',5000);
-}
+
+  const submitButton = contactForm.querySelector('.csub');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Gönderiliyor...';
+
+  try {
+    const response = await fetch(contactForm.action, {
+      method: 'POST',
+      body: new FormData(contactForm),
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      contactForm.reset();
+      successMessage.textContent = 'Mesajınız alındı, teşekkürler.';
+      successMessage.style.display = 'block';
+      setTimeout(() => {
+        successMessage.style.display = 'none';
+      }, 5000);
+    } else {
+      successMessage.textContent = 'Mesaj gönderilemedi. Lütfen tekrar deneyin.';
+      successMessage.style.display = 'block';
+    }
+  } catch (error) {
+    successMessage.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+    successMessage.style.display = 'block';
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Gönder';
+  }
+});
 </script>
 </body>
 </html>
